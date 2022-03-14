@@ -1,21 +1,30 @@
 package Ylab.Game_Lesson2.logic;
 
 import java.util.Scanner;
-import static Ylab.Game_Lesson2.body.Game.*;
 
 public class CheckGamersNames {
 
-    public void checkNames() {
+
+    public static String getPlayersName(String messageText) {
+        int tries = 0;
+
         while (true) {
-            System.out.println("Введите имя первого игрока:");
-            firstPlayerName = new Scanner(System.in).nextLine();
-            System.out.println("Введите имя второго игрока:");
-            secondPlayerName = new Scanner(System.in).nextLine();
+            System.out.println(messageText);
+            String nameVariable = new Scanner(System.in).nextLine();
 
-            if (firstPlayerName.isBlank() || secondPlayerName.isBlank()) {
+            if (tries > 3) {
+                throw new RuntimeException("Ошибка. Лимит попыток исчерпан.");
+            } else if (!checkName(nameVariable)) {
                 System.out.println("Некорректный ввод данных. Имя должно содержать хотя бы одну букву или цифру.");
-            } else break;
-
+                tries++;
+            } else {
+                return nameVariable;
+            }
         }
     }
+
+    private static boolean checkName(String name) {
+        return !name.isBlank();
+    }
+
 }

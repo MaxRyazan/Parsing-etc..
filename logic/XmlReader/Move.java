@@ -1,9 +1,9 @@
 package Ylab.Game_Lesson2.logic.XmlReader;
 
 public  final class Move {
-  final   int playerId;
-  final   int coordinate;
-  final   int num;
+    final   int playerId;
+    final   int coordinate;
+    final   int num;
 
     public Move(final int playerId, final int coordinate, final int num) {
         this.playerId = playerId;

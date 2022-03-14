@@ -1,90 +1,112 @@
 package Ylab.Game_Lesson2.body;
 
 import Ylab.Game_Lesson2.LauncherNew;
-import Ylab.Game_Lesson2.logic.*;
+import Ylab.Game_Lesson2.logic.CheckGamersNames;
+import Ylab.Game_Lesson2.logic.DrawCheck;
+import Ylab.Game_Lesson2.logic.Logs;
+import Ylab.Game_Lesson2.logic.ParsingXml;
+import Ylab.Game_Lesson2.logic.Users;
+import Ylab.Game_Lesson2.logic.WinCheck;
 import Ylab.Game_Lesson2.logic.XmlReader.Move;
+import Ylab.Game_Lesson2.logic.XmlReader.Player;
+import Ylab.Game_Lesson2.logic.XmlReader.Root;
+import java.io.FileNotFoundException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.FileNotFoundException;
-import static Ylab.Game_Lesson2.logic.Users.userOneMoveInt;
-import static Ylab.Game_Lesson2.logic.Users.userTwoMoveInt;
 
 public class Game {
-    public static boolean isWin1 = false;
-    public static boolean isWin2 = false;
-    public static boolean isDraw = false;
-    public static int countFirstPlayerMove = 0;
-    public static int countSecondPlayerMove = 0;
-    public static String firstPlayerName;
-    public static String secondPlayerName;
+
+    public Player playerOne;
+
+    public Player playerTwo;
+
     private final Logs logs;
-    private final Maps maps;
+
+    private final static Maps maps = new Maps();
+
     private final Users users;
+
     private final WinCheck winCheck;
+
     private final DrawCheck drawCheck;
-    private final CheckGamersNames checkGamersNames;
+
     private final ParsingXml parsingXml;
 
-    public Game(final Maps maps, final Users users,
+    private final boolean isFromFile;
+
+    public Game(final Users users,
                 final WinCheck winCheck, final DrawCheck drawCheck,
-                final Logs logs, final CheckGamersNames checkGamersNames, final ParsingXml parsingXml) {
-        this.maps = maps;
+                final Logs logs, final ParsingXml parsingXml, boolean isFromFile) {
         this.users = users;
         this.winCheck = winCheck;
         this.drawCheck = drawCheck;
         this.logs = logs;
-        this.checkGamersNames = checkGamersNames;
         this.parsingXml = parsingXml;
+        this.playerOne = new Player();
+        this.playerTwo = new Player();
+        this.isFromFile = isFromFile;
     }
 
-    public void play(boolean isFromFile) throws FileNotFoundException, ParserConfigurationException, TransformerException {
-        if(!isFromFile) {
-            checkGamersNames.checkNames();
-        } else  {
-            firstPlayerName = LauncherNew.root.getPlayers().get(0).getName();
-            secondPlayerName = LauncherNew.root.getPlayers().get(1).getName();
+    public void play()
+            throws FileNotFoundException, ParserConfigurationException, TransformerException {
+        if (!isFromFile) {
+            playerOne.setName(CheckGamersNames.getPlayersName("Введите имя первого игрока:"));
+            playerOne.setId("1");
+            playerOne.setSymbol("X");
+
+            playerTwo.setName(CheckGamersNames.getPlayersName("Введите имя второго игрока:"));
+            playerTwo.setId("2");
+            playerTwo.setSymbol("O");
+        } else {
+            playerOne = Root.players.get(0);
+            playerTwo = Root.players.get(1);
         }
+
         maps.printMapOnce();
-        int num = 1;
-        int num2 = 1;
-        while (true) {
-            System.out.println(firstPlayerName + " 'X' :");
-            users.printUserOneMove(maps, true);
-            LauncherNew.gamePlay.moves.add(new Move(1, userOneMoveInt, num++));
-            maps.refreshMap(maps);
-            if (winCheck.userOneWin(maps)) {
-                logs.loggingPlayerOne();
-                System.out.println(firstPlayerName + " 'X' WIN!");
-                isWin1 = true;
-                System.out.println("GAME OVER");
-                break;
-            }
-            if (drawCheck.check(maps)) {
-                logs.loggingIfDraw();
-                System.out.println("Sorry.. nobody win.. its a DRAW!");
-                System.out.println("GAME OVER");
-                isDraw = true;
-                break;
-            }
-            System.out.println(secondPlayerName + " '0' :");
-            users.printUserTwoMove(maps, true);
-            LauncherNew.gamePlay.moves.add(new Move(2, userTwoMoveInt, num2++));
-            maps.refreshMap(maps);
-            if (winCheck.userTwoWin(maps)) {
-                logs.loggingPlayerTwo();
-                System.out.println(secondPlayerName + " '0' WIN!");
-                System.out.println("GAME OVER");
-                isWin2 = true;
-                break;
-            }
-            if (drawCheck.check(maps)) {
-                logs.loggingIfDraw();
-                System.out.println("Sorry.. nobody win.. its a DRAW!");
-                System.out.println("GAME OVER");
-                isDraw = true;
-                break;
+
+        System.out.println(playerOne.getName() + " make move using symbol '" + playerOne.getSymbol() + "'");
+        System.out.println(playerTwo.getName() + " make move using symbol '" + playerTwo.getSymbol() + "'");
+        System.out.println("Let's ROCK!!!");
+
+        boolean gameEnded = false;
+
+        while (!gameEnded) {
+            gameEnded = makePlayerMove(playerOne);
+
+            if (!gameEnded) {
+                gameEnded = makePlayerMove(playerTwo);
             }
         }
-        parsingXml.parse();
+
+        if(!isFromFile) {
+            parsingXml.parse(playerOne, playerTwo);
+        }
+}
+    private boolean makePlayerMove(Player player) {
+        System.out.println(player.getName() + " '" + player.getSymbol() + "' :");
+
+        Cell movedCell = users.printUserMove(player, isFromFile);
+
+        LauncherNew.gamePlay.moves.add(new Move(
+                Integer.parseInt(player.getId()),
+                movedCell.getCellNumber(),
+                player.getMoveCounter()
+        ));
+
+        Maps.refreshMap();
+
+        if (winCheck.uisUerWin(player.getSymbol())) {
+            player.setWinner(true);
+            logs.loggingWin(player);
+            System.out.println(player.getName() + " '" + player.getSymbol() + "' WIN!");
+            System.out.println("GAME OVER");
+            return true;
+        } else if (drawCheck.check()) {
+            logs.loggingIfDraw();
+            System.out.println("Sorry.. nobody win.. its a DRAW!");
+            System.out.println("GAME OVER");
+            return true;
+        }
+        return false;
     }
 }

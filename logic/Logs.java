@@ -1,28 +1,16 @@
 package Ylab.Game_Lesson2.logic;
 
+import Ylab.Game_Lesson2.logic.XmlReader.Player;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static Ylab.Game_Lesson2.body.Game.firstPlayerName;
-import static Ylab.Game_Lesson2.body.Game.secondPlayerName;
-
 public class Logs {
 
-    public void loggingPlayerOne() {
+    public void loggingWin(Player player) {
         try (
                 BufferedWriter bw = new BufferedWriter(new FileWriter("GameLogs.txt", true))) {
-            bw.write(firstPlayerName + " ('X') WIN !!!\n");
-        } catch (
-                IOException ex) {
-            System.out.println("File not found");
-        }
-    }
-
-    public void loggingPlayerTwo() {
-        try (
-                BufferedWriter bw = new BufferedWriter(new FileWriter("GameLogs.txt", true))) {
-            bw.write(secondPlayerName + " ('0') WIN !!!\n");
+            bw.write(player.getName() + " ('" + player.getSymbol() + "') WIN !!!\n");
         } catch (
                 IOException ex) {
             System.out.println("File not found");
@@ -38,4 +26,5 @@ public class Logs {
             System.out.println("File not found");
         }
     }
+
 }
