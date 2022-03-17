@@ -21,6 +21,7 @@ import static Ylab.Game_Lesson2.LauncherNew.gamePlay;
 public class ParsingXml {
 
     public void parse(Player playerOne, Player playerTwo) throws ParserConfigurationException, FileNotFoundException, TransformerException {
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.newDocument();

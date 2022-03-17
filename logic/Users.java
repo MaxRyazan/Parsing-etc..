@@ -41,9 +41,10 @@ public class Users {
                     if (!Maps.isEmpty(cell)) {
                         System.out.println("Ошибка. Ячейка уже занята.");
                         tries++;
-                    }
+                    } else {
 
-                    return cell;
+                        return cell;
+                    }
                 } catch (NumberFormatException nfe) {
                     System.out.println("Ошибка. Введенный символ должен быть числом.");
                     tries++;
